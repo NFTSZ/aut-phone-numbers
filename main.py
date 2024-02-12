@@ -29,10 +29,19 @@ with connection:
   connection.execute('''
                      CREATE TABLE IF NOT EXISTS phone_numbers (id INTEGER 
                      PRIMARY KEY, number TEXT)''')
+  
   # insert the phone numbers in database
   for numbers in removed_dup:
-    connection.execute('INSERT INTO phone_numbers (number) VALUES (?)',
-                       (numbers,))
+    cursor = connection.execute('SELECT id FROM phone_numbers WHERE number = ?', 
+                                (numbers,))
+    existing_number = cursor.fetchone()
+
+    if existing_number is None:
+      connection.execute('INSERT INTO phone_numbers (number) VALUES (?)',
+                         (numbers,))
+    else:
+      print(f'O numero {numbers} ja esta na tabela.')
+      continue
 
 # close the connection with the database
 connection.close()
